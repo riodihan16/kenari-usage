@@ -57,8 +57,6 @@ cd src-tauri && cargo test        # unit test Rust
 cd src-tauri && cargo clippy      # lint Rust
 ```
 
-CI menjalankan semua perintah di atas pada setiap push/PR (lihat `.github/workflows/ci.yml`).
-
 ## Menyiapkan API key
 
 API key diambil dengan urutan prioritas berikut (lihat `src-tauri/src/config.rs`):
