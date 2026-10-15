@@ -49,6 +49,21 @@ npm run build          # type-check + build frontend ke dist/
 npm run tauri build    # bundel aplikasi desktop
 ```
 
+Hasil build ada di `src-tauri/target/release/bundle/` (installer `.exe`/`.msi` di subfolder `nsis/` dan `msi/`).
+
+## Merilis
+
+Rilis dibuat otomatis oleh GitHub Actions (`.github/workflows/release.yml`) saat Anda push tag berawalan `v`.
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Workflow membangun installer Windows dan mengunggahnya ke halaman **Releases** sebagai **draft**. Buka tab *Releases* di GitHub, tulis catatan rilis, lalu klik **Publish** agar bisa diunduh publik.
+
+> Installer tidak ditandatangani (unsigned), jadi Windows SmartScreen akan menampilkan peringatan saat dipasang. Pengguna dapat memilih *More info → Run anyway*.
+
 ## Pengujian
 
 ```bash
