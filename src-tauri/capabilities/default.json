@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default capability for the main and compact windows",
+  "description": "Izin minimal untuk window main dan compact. Hanya event listen (compact widget) dan window start-dragging yang dibutuhkan frontend; jangan perluas tanpa alasan.",
   "windows": ["main", "compact"],
-  "permissions": ["core:default", "core:window:allow-start-dragging"]
+  "permissions": ["core:event:allow-listen", "core:window:allow-start-dragging"]
 }
