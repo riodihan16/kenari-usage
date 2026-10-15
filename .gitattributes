@@ -1,0 +1,16 @@
+# Normalisasi akhir baris: simpan LF di repo, apa pun OS kontributor.
+* text=auto eol=lf
+
+# Aset biner — jangan disentuh git.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.icns binary
+*.woff binary
+*.woff2 binary
+
+# File generate — sembunyikan dari diff PR di GitHub.
+package-lock.json linguist-generated=true
+src-tauri/Cargo.lock linguist-generated=true

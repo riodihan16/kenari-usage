@@ -3,6 +3,9 @@ name = "kenari-usage"
 version = "0.1.0"
 description = "Kenari usage dashboard"
 edition = "2021"
+license = "MIT"
+authors = ["Ridho DR <ridho.d.ramadhan@gmail.com>"]
+repository = "https://github.com/riodihan16/kenari-usage"
 
 [lib]
 name = "kenari_usage_lib"

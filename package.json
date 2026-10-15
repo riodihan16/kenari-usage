@@ -2,7 +2,19 @@
   "name": "kenari-usage",
   "private": true,
   "version": "0.1.0",
+  "description": "Aplikasi desktop untuk memantau saldo, kuota, dan pemakaian API Kenari",
+  "license": "MIT",
+  "author": "Ridho DR <ridho.d.ramadhan@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/riodihan16/kenari-usage.git"
+  },
+  "homepage": "https://github.com/riodihan16/kenari-usage#readme",
+  "bugs": "https://github.com/riodihan16/kenari-usage/issues",
   "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

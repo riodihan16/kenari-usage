@@ -9,6 +9,7 @@ Panduan untuk agen AI (dan kontributor) yang bekerja di repositori ini. Baca ini
 - Frontend: TypeScript + Vite (`src/`, `index.html`, `compact.html`)
 - Backend: Rust (`src-tauri/src/`)
 - Komunikasi: frontend memanggil command Rust via `invoke()`; Rust yang menyimpan API key dan memanggil `kenari.id`.
+- Referensi API Kenari: `docs/kenari-api-reference.md`.
 
 ## Perintah penting
 

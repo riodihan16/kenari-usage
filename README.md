@@ -72,6 +72,7 @@ src/
   compact.ts             Logika widget compact
   kenari.ts              Binding ke command Tauri + tipe data
   format.ts              Helper format angka/mata uang
+  html.ts                Helper escaping HTML + render baris kuota
   tokens.css             Token desain (warna, spacing, radius)
   styles.css             Gaya dashboard
   compact.css            Gaya widget compact
@@ -81,8 +82,14 @@ src-tauri/
   src/config.rs          Resolusi & penyimpanan API key
   capabilities/          Izin Tauri (ACL)
   tauri.conf.json        Konfigurasi aplikasi + CSP
+docs/
+  kenari-api-reference.md  Referensi API Kenari (untuk developer/AI)
 design.md                Sistem desain (dibaca sebelum mengubah UI)
 ```
+
+## Referensi API
+
+Ringkasan endpoint, penagihan, rate limit, dan keamanan key Kenari ada di [docs/kenari-api-reference.md](docs/kenari-api-reference.md). Dokumen itu untuk developer/AI yang menyentuh integrasi API.
 
 ## Keamanan
 

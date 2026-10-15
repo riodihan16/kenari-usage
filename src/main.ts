@@ -383,6 +383,7 @@ async function saveKey(): Promise<void> {
     state.keyStatus = await saveApiKey(value);
     input.value = "";
     renderKeyBadge();
+    setupTimer();
     toast("API key tersimpan dan tervalidasi.");
     await loadKeys();
     await refreshAll();
@@ -395,6 +396,7 @@ async function removeKey(): Promise<void> {
   try {
     state.keyStatus = await clearApiKey();
     renderKeyBadge();
+    setupTimer();
     toast("API key tersimpan dihapus.");
   } catch (error) {
     toast(errMsg(error), true);
@@ -406,7 +408,7 @@ function setupTimer(): void {
     window.clearInterval(state.timer);
     state.timer = null;
   }
-  if (state.refreshSecs > 0) {
+  if (state.refreshSecs > 0 && state.keyStatus?.configured) {
     state.timer = window.setInterval(() => {
       void refreshAll();
     }, state.refreshSecs * 1000);
