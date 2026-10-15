@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kenari Usage</title>
+  </head>
+  <body class="compact-body">
+    <div class="bubble" id="bubble">
+      <div class="ring-view" id="ring-view" title="Kenari Usage — hover untuk detail, tahan & geser untuk pindah">
+        <span class="glow" aria-hidden="true"></span>
+        <div class="ring-wrap">
+          <svg class="ring" viewBox="0 0 64 64" aria-hidden="true">
+            <defs>
+              <linearGradient id="ring-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#7be0b1" />
+                <stop offset="50%" stop-color="#4caf7d" />
+                <stop offset="100%" stop-color="#f2b134" />
+              </linearGradient>
+              <linearGradient id="ring-grad-warn" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ffd36e" />
+                <stop offset="55%" stop-color="#f2b134" />
+                <stop offset="100%" stop-color="#f26b34" />
+              </linearGradient>
+            </defs>
+            <circle class="ring-track" cx="32" cy="32" r="27" pathLength="100" />
+            <circle class="ring-fill" id="ring-fill" cx="32" cy="32" r="27" pathLength="100" />
+          </svg>
+          <span class="shimmer" aria-hidden="true"></span>
+          <span class="ring-label" id="ring-label">
+            <strong id="ring-pct">–</strong>
+            <small>minggu</small>
+          </span>
+        </div>
+      </div>
+      <section class="card-view" id="card-view">
+        <header class="cc-head" id="cc-head">
+          <span class="cc-title">Kenari <span id="cc-plan" class="muted"></span></span>
+          <span class="cc-actions">
+            <button id="cc-open" class="cc-btn acc" type="button">Buka</button>
+            <button id="cc-quit" class="cc-btn cc-quit" type="button" title="Keluar">×</button>
+          </span>
+        </header>
+        <div id="cc-windows" class="cc-windows">
+          <div class="muted small">Memuat…</div>
+        </div>
+        <footer class="cc-foot"><span id="cc-updated" class="muted small">—</span></footer>
+      </section>
+    </div>
+    <script type="module" src="/src/compact.ts"></script>
+  </body>
+</html>
