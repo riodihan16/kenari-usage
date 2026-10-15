@@ -40,7 +40,26 @@ pub fn mask_key(key: &str) -> String {
     if count <= 12 {
         return "*".repeat(count);
     }
-    let head: String = key.chars().take(9).collect();
-    let tail: String = key.chars().skip(count - 6).collect();
+    let head: String = key.chars().take(4).collect();
+    let tail: String = key.chars().skip(count - 4).collect();
     format!("{head}...{tail}")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mask_key_reveals_at_most_eight_characters() {
+        let key = "kn-1234567890abcdefghijklmnopqrstuvwxyz";
+        let masked = mask_key(key);
+        let revealed = masked.chars().filter(|c| *c != '*' && *c != '.').count();
+        assert!(revealed <= 8, "revealed {revealed} characters: {masked}");
+        assert!(masked.contains("..."));
+    }
+
+    #[test]
+    fn mask_key_fully_masks_short_keys() {
+        assert_eq!(mask_key("kn-12345"), "********");
+    }
 }

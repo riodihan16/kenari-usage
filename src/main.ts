@@ -28,11 +28,12 @@ import {
   fmtInt,
   fmtMicroRp,
   fmtNumber,
-  fmtPct,
   fmtRp,
   fmtTime,
   fmtTokens,
+  pageCount,
 } from "./format";
+import { escapeHtml, quotaWindowRow } from "./html";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T =>
   document.getElementById(id) as T;
@@ -66,17 +67,6 @@ const state: UiState = {
   timer: null,
   refreshSecs: Number.isFinite(storedSecs) && storedSecs >= 0 ? storedSecs : 60,
 };
-
-const ESCAPES: Record<string, string> = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#39;",
-};
-
-const escapeHtml = (value: string): string =>
-  value.replace(/[&<>"']/g, (char) => ESCAPES[char] ?? char);
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
@@ -148,26 +138,13 @@ function renderBalance(balance: Balance): void {
   $("balance-sub").textContent = `total ${fmtMicroRp(balance.balance_micro_idr)} · tertahan ${fmtMicroRp(balance.reserved_micro_idr)}`;
 }
 
-function windowRow(label: string, window: QuotaWindow, alertPct: number): string {
-  const pct = Math.min(window.used_frac * 100, 100);
-  const warn = window.used_frac * 100 >= alertPct;
-  return `<div class="qwin">
-    <div class="qwin-head">
-      <span>${label}</span>
-      <span class="${warn ? "warn" : "muted"}">${fmtPct(window.used_frac)} · ${fmtRp(window.used_rp)} / ${fmtRp(window.budget_rp)}</span>
-    </div>
-    <div class="bar"><div class="bar-fill ${warn ? "warn" : ""}" style="--frac:${(pct / 100).toFixed(4)}"></div></div>
-    <div class="sub">sisa ${fmtRp(window.remaining_rp)} · reset ${fmtDateTime(window.resets_at)}</div>
-  </div>`;
-}
-
 function renderQuota(quota: Quota): void {
   $("plan-name").textContent = quota.plan?.name ? `· plan ${quota.plan.name}` : "";
   const windows = quota.plan?.windows;
   const parts: string[] = [];
-  if (windows?.five_hour) parts.push(windowRow("5 jam", windows.five_hour, quota.alert_pct));
-  if (windows?.week) parts.push(windowRow("Mingguan", windows.week, quota.alert_pct));
-  if (windows?.month) parts.push(windowRow("Bulanan", windows.month, quota.alert_pct));
+  if (windows?.five_hour) parts.push(quotaWindowRow("5 jam", windows.five_hour, quota.alert_pct));
+  if (windows?.week) parts.push(quotaWindowRow("Mingguan", windows.week, quota.alert_pct));
+  if (windows?.month) parts.push(quotaWindowRow("Bulanan", windows.month, quota.alert_pct));
   $("quota-windows").innerHTML =
     parts.join("") || `<div class="sub">Tidak ada kuota plan aktif.</div>`;
 
@@ -311,7 +288,7 @@ function renderLog(page: UsageLogPage): void {
       )
       .join("") || `<tr><td colspan="8" class="muted">Tidak ada log pada rentang ini.</td></tr>`;
 
-  const pages = Math.max(1, Math.ceil(page.total / page.limit));
+  const pages = pageCount(page.total, page.limit);
   $("page-info").textContent = `halaman ${page.page + 1} / ${pages} · total ${fmtInt(page.total)} request`;
   $<HTMLButtonElement>("prev-page").disabled = page.page <= 0;
   $<HTMLButtonElement>("next-page").disabled = !page.has_more;
@@ -329,9 +306,13 @@ function logFilters(): LogFilters {
 }
 
 let refreshing = false;
+let pendingRefresh = false;
 
 async function refreshAll(): Promise<void> {
-  if (refreshing) return;
+  if (refreshing) {
+    pendingRefresh = true;
+    return;
+  }
   refreshing = true;
   const errors: string[] = [];
   const settle = async <T,>(promise: Promise<T>, apply: (value: T) => void) => {
@@ -356,6 +337,10 @@ async function refreshAll(): Promise<void> {
     banner.classList.add("hidden");
   }
   refreshing = false;
+  if (pendingRefresh) {
+    pendingRefresh = false;
+    await refreshAll();
+  }
 }
 
 async function loadKeyStatus(): Promise<void> {

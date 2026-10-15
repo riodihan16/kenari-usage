@@ -18,7 +18,9 @@ Panduan untuk agen AI (dan kontributor) yang bekerja di repositori ini. Baca ini
 | `npm run dev` | Vite dev server (frontend saja, tanpa Tauri) |
 | `npm run tauri dev` | Jalankan aplikasi lengkap |
 | `npm run build` | Type-check (`tsc --noEmit`) + build frontend |
+| `npm test` | Jalankan unit test frontend (Vitest) |
 | `npm run tauri build` | Bundel aplikasi rilis |
+| `cargo test` | (di `src-tauri/`) Jalankan unit test Rust |
 | `cargo check` | (di `src-tauri/`) Cek kompilasi Rust |
 
 > **Catatan lingkungan:** `cargo` mungkin tidak ada di PATH. Di Windows biasanya di `~/.cargo/bin`. Tambahkan ke PATH sebelum menjalankan perintah Rust.
@@ -37,7 +39,7 @@ Ini aturan yang tidak bisa dinegosiasikan:
 ## Batasan perubahan
 
 - **`design.md` adalah sumber kebenaran untuk UI.** Baca sebelum mengubah tampilan; jangan regenerasi gaya per-window. Perluas `design.md` bila sistem desain perlu tumbuh.
-- **Jangan mengubah `src-tauri/gen/`** — itu hasil generate. File ini di-ignore git.
+- **Jangan mengubah `src-tauri/gen/`** — itu hasil generate. `src-tauri/gen/schemas/` di-ignore git.
 - **Jangan meng-commit `node_modules/`, `dist/`, atau `src-tauri/target/`.**
 - **Jangan menghapus atau menimpa pekerjaan yang belum Anda pahami.** Kalau ada file atau perubahan yang tidak Anda kenali, tanyakan dulu.
 - **Jangan menambah dependensi** tanpa alasan jelas. Pertahankan jejak dependensi tetap kecil.
@@ -55,7 +57,8 @@ Jalankan dan pastikan hijau:
 
 ```bash
 npm run build        # type-check + build frontend
-cd src-tauri && cargo check
+npm test             # unit test frontend (Vitest)
+cd src-tauri && cargo test
 ```
 
 Lalu periksa ulang:

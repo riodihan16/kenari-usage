@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
 
 pub const BASE_URL: &str = "https://kenari.id/v1";
 
@@ -176,12 +177,14 @@ pub struct Client {
 }
 
 impl Client {
-    pub fn new(key: String) -> Self {
+    pub fn new(key: String) -> Result<Self, ApiError> {
         let http = reqwest::Client::builder()
             .user_agent(concat!("kenari-usage/", env!("CARGO_PKG_VERSION")))
+            .timeout(Duration::from_secs(30))
+            .connect_timeout(Duration::from_secs(10))
             .build()
-            .expect("failed to build http client");
-        Self { http, key }
+            .map_err(|e| ApiError::local(format!("Gagal menyiapkan klien HTTP: {e}")))?;
+        Ok(Self { http, key })
     }
 
     async fn get<T: serde::de::DeserializeOwned>(
@@ -306,4 +309,26 @@ fn parse_error(status: u16, body: &str) -> ApiError {
         }
     });
     ApiError::new(Some(status), code, message)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn client_builds_without_panicking() {
+        let client = Client::new("kn-test-1234567890".to_string());
+        assert!(client.is_ok(), "client should build: {:?}", client.err());
+    }
+
+    #[test]
+    fn parse_error_prefers_structured_message() {
+        let err = parse_error(
+            429,
+            r#"{"error":{"code":"rate_limited","message":"Terlalu banyak"}}"#,
+        );
+        assert_eq!(err.status, Some(429));
+        assert_eq!(err.code.as_deref(), Some("rate_limited"));
+        assert_eq!(err.message, "Terlalu banyak");
+    }
 }

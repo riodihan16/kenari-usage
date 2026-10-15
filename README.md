@@ -60,7 +60,7 @@ Cara paling mudah: buka aplikasi → **Pengaturan** → tempel key (diawali `kn-
 
 Untuk pengembangan, salin `.env.example` menjadi `.env` dan isi `KENARI_API_KEY`. File `.env` sudah diabaikan git dan **tidak boleh di-commit**.
 
-> Saldo dan kuota membutuhkan key *unrestricted*. Key *restricted/shared* hanya dapat membaca usage miliknya sendiri.
+> Saldo dan kuota membutuhkan key *unrestricted*. Key *restricted* hanya dapat membaca usage miliknya sendiri; key *shared* tidak dapat membaca saldo, kuota, maupun usage (ditolak).
 
 ## Struktur proyek
 

@@ -41,3 +41,8 @@ export function fmtDateTime(iso: string): string {
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" });
 }
+
+export function pageCount(total: number, limit: number): number {
+  const safeLimit = limit > 0 ? limit : total;
+  return Math.max(1, Math.ceil(total / safeLimit));
+}

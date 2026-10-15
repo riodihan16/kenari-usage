@@ -38,6 +38,8 @@ Tulis pesan dalam Bahasa Indonesia atau Inggris, yang penting konsisten dan jela
 
 ```bash
 npm run build                        # type-check + build frontend
+npm test                             # unit test frontend (Vitest)
+cd src-tauri && cargo test           # unit test Rust
 cd src-tauri && cargo check          # cek kompilasi Rust
 ```
 

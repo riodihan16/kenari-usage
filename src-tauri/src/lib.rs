@@ -11,7 +11,7 @@ use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 fn client() -> Result<api::Client, ApiError> {
     let (key, _source) =
         config::resolve_key().ok_or_else(|| ApiError::local("API key belum diatur"))?;
-    Ok(api::Client::new(key))
+    api::Client::new(key)
 }
 
 #[derive(Serialize)]
@@ -49,7 +49,7 @@ async fn save_api_key(key: String) -> Result<KeyStatus, ApiError> {
             "Format API key tidak valid (harus diawali kn-)",
         ));
     }
-    api::Client::new(key.clone()).usage("today", None).await?;
+    api::Client::new(key.clone())?.usage("today", None).await?;
     config::save_key(&key).map_err(ApiError::local)?;
     Ok(status())
 }
@@ -204,12 +204,17 @@ fn clamp_window_pos(
 
 fn resolve_anchor(app: &tauri::AppHandle) -> tauri::PhysicalPosition<i32> {
     let state = app.state::<CompactRuntime>();
-    let mut guard = state.anchor.lock().unwrap();
-    if let Some(anchor) = *guard {
-        return anchor;
-    }
-    let anchor = default_anchor(app);
-    *guard = Some(anchor);
+    let anchor = match state.anchor.lock() {
+        Ok(mut guard) => {
+            if let Some(anchor) = *guard {
+                return anchor;
+            }
+            let anchor = default_anchor(app);
+            *guard = Some(anchor);
+            anchor
+        }
+        Err(_) => default_anchor(app),
+    };
     anchor
 }
 
@@ -283,9 +288,8 @@ fn compact_tick(
         tauri::PhysicalPosition::new(pos.x + size.width as i32, pos.y + size.height as i32),
     );
     let runtime = app.state::<CompactRuntime>();
-    match runtime.anchor.lock() {
-        Ok(mut guard) => *guard = Some(anchor),
-        Err(_) => {}
+    if let Ok(mut guard) = runtime.anchor.lock() {
+        *guard = Some(anchor);
     }
 
     let hovered = match window.cursor_position() {
