@@ -1,0 +1,111 @@
+/* Hallmark · genre: modern-minimal (extended) · macrostructure: Stat-Led · design-system: design.md · designed-as-app
+ * theme: custom · vibe: "bold, modern, strong, curvy, zero-gradient" · paper: oklch(15% 0.012 80) · accent: oklch(80% 0.15 80)
+ * display: Bricolage Grotesque 800 · body: Manrope 400 · data: JetBrains Mono 500
+ * axes: dark / display-heavy / warm-amber · studied: no · context: user-provided
+ */
+/* Hallmark · pre-emit critique: P5 H4 E5 S4 R5 V5
+ * slop test: 58/58 pass · contrast: pass (40–41) · nav/footer: n/a · honest: pass (46) · chrome: pass (47)
+ * tokens: pass (48) · responsive: pass (49) · mobile: pass (34, 49, 50–57)
+ */
+
+@import "@fontsource-variable/bricolage-grotesque";
+@import "@fontsource-variable/manrope";
+@import "@fontsource-variable/jetbrains-mono";
+
+:root {
+  color-scheme: dark;
+
+  /* Colour — Kenari Bold */
+  --color-paper: oklch(15% 0.012 80);
+  --color-paper-2: oklch(19.5% 0.014 80);
+  --color-paper-3: oklch(24% 0.015 80);
+  --color-ink: oklch(93% 0.008 80);
+  --color-ink-2: oklch(78% 0.01 80);
+  --color-muted: oklch(66% 0.01 80);
+  --color-rule: oklch(31% 0.012 80);
+  --color-rule-2: oklch(26% 0.011 80);
+  --color-accent: oklch(80% 0.15 80);
+  --color-accent-strong: oklch(85% 0.16 80);
+  --color-accent-ink: oklch(22% 0.04 80);
+  --color-focus: oklch(85% 0.17 80);
+  --color-ok: oklch(80% 0.13 155);
+  --color-danger: oklch(72% 0.15 25);
+  --color-danger-text: oklch(82% 0.11 25);
+  --color-warn-bg: oklch(27% 0.045 80);
+  --color-warn-rule: oklch(45% 0.09 80);
+  --color-danger-bg: oklch(24% 0.05 25);
+  --color-danger-rule: oklch(44% 0.1 25);
+  --color-overlay: oklch(10% 0.01 80 / 0.62);
+
+  /* Billing-kind categorical hues — data encoding, not decoration */
+  --color-kind-payg: var(--color-accent);
+  --color-kind-plan: oklch(80% 0.13 155);
+  --color-kind-free: oklch(80% 0.09 225);
+  --color-kind-byok: oklch(80% 0.1 300);
+  --color-kind-coupon: oklch(80% 0.11 350);
+  --color-kind-token-alloc: oklch(78% 0.07 255);
+
+  /* Type */
+  --font-display: "Bricolage Grotesque Variable", "Bricolage Grotesque", "Segoe UI", ui-sans-serif, sans-serif;
+  --font-body: "Manrope Variable", "Manrope", "Segoe UI", ui-sans-serif, sans-serif;
+  --font-data: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "Cascadia Code", monospace;
+
+  --text-xs: 0.6875rem; /* 11px */
+  --text-sm: 0.8125rem; /* 13px */
+  --text-base: 0.875rem; /* 14px */
+  --text-md: 1rem; /* 16px */
+  --text-lg: 1.25rem; /* 20px */
+  --text-xl: 1.5625rem; /* 25px */
+  --text-2xl: 1.953rem; /* 31px */
+  --text-3xl: 2.441rem; /* 39px */
+  --text-display: clamp(2.25rem, 1.5rem + 2.4vw, 3rem);
+
+  --weight-body: 400;
+  --weight-medium: 500;
+  --weight-strong: 700;
+  --weight-display: 800;
+
+  /* Space — 4pt-descended compact app scale */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+
+  /* Radii — curvy */
+  --radius-xs: 0.5rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.375rem;
+  --radius-xl: 1.75rem;
+  --radius-pill: 999px;
+
+  /* Lines */
+  --border-w: 1.5px;
+  --border-hairline: 1px;
+
+  /* Controls — shared base height (input = button, per control row) */
+  --control-h: 2.75rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+
+  /* Elevation — a single tight, dark shadow for floating surfaces only */
+  --shadow-float: 0 16px 40px oklch(6% 0.008 80 / 0.5);
+
+  /* Z scale */
+  --z-base: 1;
+  --z-raised: 10;
+  --z-sticky: 200;
+  --z-sticky-nav: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+}

@@ -1,0 +1,9 @@
+{
+  "date": "2026-10-15",
+  "font_stack": "Segoe UI system-only, no webfonts — was src/styles.css L25, src/compact.css L26; now Bricolage Grotesque Variable + Manrope Variable + JetBrains Mono Variable via @fontsource (self-hosted, CSP-safe)",
+  "palette": "was 8 CSS custom properties duplicated in two files (styles.css L1-10, compact.css L1-10): dark navy #0e1116 + gold #f2b134; now one shared src/tokens.css, OKLCH, Kenari Bold theme",
+  "motion": "no library; local keyframes (breathe, glow-pulse, spin) + gradients in compact widget — removed; now 3 primitives (number tick, fill sweep, press feedback)",
+  "spacing": "was no scale, ad-hoc px; now 4pt compact scale in tokens.css",
+  "framework": "Tauri v2 + Vite 6 + vanilla TS, 2 entries (index.html dashboard, compact.html widget)",
+  "csp_note": "Tauri CSP allows 'self' only — external font CDNs are blocked; fonts are bundled via @fontsource variable packages"
+}

@@ -48,7 +48,7 @@ function windowRow(label: string, window: QuotaWindow, alertPct: number): string
       <span>${label}</span>
       <span class="${warn ? "warn" : "muted"}">${fmtPct(window.used_frac)}</span>
     </div>
-    <div class="cc-bar"><div class="cc-bar-fill ${warn ? "warn" : ""}" style="width:${pct.toFixed(2)}%"></div></div>
+    <div class="cc-bar"><div class="cc-bar-fill ${warn ? "warn" : ""}" style="--frac:${(pct / 100).toFixed(4)}"></div></div>
     <div class="muted small">${fmtRp(window.used_rp)} / ${fmtRp(window.budget_rp)} · sisa ${fmtRp(window.remaining_rp)}</div>
   </div>`;
 }

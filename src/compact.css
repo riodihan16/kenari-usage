@@ -1,13 +1,5 @@
-:root {
-  --bg: #0e1116;
-  --panel: #161b22;
-  --panel-2: #1b2230;
-  --border: #232a33;
-  --text: #e6e9ee;
-  --muted: #8b96a5;
-  --accent: #f2b134;
-  --ok: #4caf7d;
-}
+/* Hallmark · genre: modern-minimal (extended) · macrostructure: Stat-Led (stat-form: radial-ring) · design-system: design.md · designed-as-app */
+@import "./tokens.css";
 
 * {
   box-sizing: border-box;
@@ -18,14 +10,20 @@ body {
   margin: 0;
   padding: 0;
   background: transparent;
-  overflow: hidden;
+  overflow: clip;
 }
 
 body.compact-body {
-  color: var(--text);
-  font: 12.5px/1.4 "Segoe UI", system-ui, sans-serif;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  font-weight: var(--weight-body);
+  -webkit-font-smoothing: antialiased;
   user-select: none;
 }
+
+/* ── Bubble / ring ──────────────────────────────────────── */
 
 .bubble {
   position: fixed;
@@ -37,20 +35,20 @@ body.compact-body {
 }
 
 .bubble.pop {
-  animation: bubble-in 0.5s cubic-bezier(0.16, 1.3, 0.3, 1);
+  animation: bubble-in var(--dur-long) var(--ease-out);
 }
 
 .ring-view {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: var(--z-base);
   display: grid;
   place-items: center;
   cursor: grab;
   transform-origin: 100% 100%;
   transition:
-    opacity 0.2s ease,
-    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity var(--dur-short) var(--ease-out),
+    transform var(--dur-long) var(--ease-out);
 }
 
 .ring-view:active {
@@ -63,17 +61,6 @@ body.compact-body {
   height: 64px;
   display: grid;
   place-items: center;
-  animation: breathe 3.8s ease-in-out infinite;
-}
-
-.glow {
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 58%, rgba(242, 177, 52, 0.32), rgba(242, 177, 52, 0) 66%);
-  filter: blur(5px);
-  animation: glow-pulse 3.8s ease-in-out infinite;
-  pointer-events: none;
 }
 
 .ring {
@@ -84,44 +71,25 @@ body.compact-body {
 
 .ring circle {
   fill: none;
-  stroke-width: 6;
+  stroke-width: 6.5;
   stroke-linecap: round;
 }
 
 .ring-track {
-  stroke: rgba(255, 255, 255, 0.09);
+  stroke: color-mix(in oklab, var(--color-ink) 14%, transparent);
 }
 
 .ring-fill {
-  stroke: url(#ring-grad);
+  stroke: var(--color-ok);
   stroke-dasharray: 100;
   stroke-dashoffset: 100;
-  filter: drop-shadow(0 2px 6px rgba(76, 175, 125, 0.35));
   transition:
-    stroke-dashoffset 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-    stroke 0.3s ease;
+    stroke-dashoffset var(--dur-long) var(--ease-out),
+    stroke var(--dur-short) var(--ease-out);
 }
 
 .bubble.warn .ring-fill {
-  stroke: url(#ring-grad-warn);
-  filter: drop-shadow(0 2px 6px rgba(242, 177, 52, 0.45));
-}
-
-.shimmer {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: conic-gradient(
-    from 0deg,
-    rgba(255, 255, 255, 0) 0deg,
-    rgba(255, 255, 255, 0.32) 22deg,
-    rgba(255, 255, 255, 0) 60deg
-  );
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 5px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 7px), #000 calc(100% - 5px));
-  animation: spin 4.8s linear infinite;
-  opacity: 0.55;
-  pointer-events: none;
+  stroke: var(--color-accent);
 }
 
 .ring-label {
@@ -133,44 +101,43 @@ body.compact-body {
 }
 
 .ring-label strong {
-  font-size: 15px;
-  font-weight: 700;
+  font-family: var(--font-data);
+  font-size: var(--text-md);
+  font-weight: var(--weight-strong);
   font-variant-numeric: tabular-nums;
 }
 
 .ring-label small {
-  font-size: 8.5px;
-  color: var(--muted);
+  font-size: 9px;
+  color: var(--color-muted);
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.12em;
 }
+
+/* ── Expanded card ──────────────────────────────────────── */
 
 .card-view {
   position: absolute;
   right: 0;
   bottom: 0;
-  z-index: 2;
+  z-index: var(--z-raised);
   width: 340px;
   height: 200px;
   display: flex;
   flex-direction: column;
-  gap: 7px;
-  padding: 10px 13px;
-  background: linear-gradient(160deg, rgba(30, 37, 48, 0.97), rgba(15, 18, 24, 0.98));
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 14px;
-  box-shadow:
-    0 18px 48px rgba(0, 0, 0, 0.55),
-    0 2px 10px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-paper-2);
+  border: var(--border-w) solid var(--color-rule);
+  border-radius: var(--radius-xl);
   opacity: 0;
   transform: scale(0.18);
   transform-origin: 100% 100%;
   pointer-events: none;
   will-change: transform, opacity;
   transition:
-    transform 0.24s cubic-bezier(0.4, 0, 0.6, 1),
-    opacity 0.18s ease;
+    transform var(--dur-short) var(--ease-in),
+    opacity calc(var(--dur-short) * 0.75) var(--ease-in);
 }
 
 body.expanded .card-view {
@@ -178,21 +145,24 @@ body.expanded .card-view {
   transform: scale(1);
   pointer-events: auto;
   transition:
-    transform 0.38s cubic-bezier(0.16, 1.3, 0.3, 1),
-    opacity 0.2s ease;
+    transform var(--dur-long) var(--ease-out),
+    opacity var(--dur-short) var(--ease-out);
 }
 
 body.expanded .ring-view {
   opacity: 0;
   transform: scale(0.3);
   pointer-events: none;
+  transition:
+    opacity var(--dur-micro) var(--ease-in-out),
+    transform var(--dur-short) var(--ease-in);
 }
 
 .cc-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--space-xs);
   cursor: grab;
 }
 
@@ -201,79 +171,118 @@ body.expanded .ring-view {
 }
 
 .cc-title {
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: var(--weight-strong);
+  font-size: var(--text-base);
+  letter-spacing: -0.01em;
 }
 
 .cc-actions {
   display: flex;
-  gap: 6px;
+  align-items: center;
+  gap: var(--space-xs);
 }
 
 .cc-btn {
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 7px;
-  padding: 1px 9px;
-  font: inherit;
-  font-size: 11.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-paper-3);
+  color: var(--color-ink);
+  border: var(--border-w) solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  padding: var(--space-3xs) var(--space-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
   transition:
-    border-color 0.18s ease,
-    color 0.18s ease,
-    background 0.18s ease;
+    background-color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
 }
 
 .cc-btn:hover {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
+}
+
+.cc-btn:active {
+  transform: scale(0.97);
+}
+
+.cc-btn:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.cc-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .cc-btn.acc {
-  background: var(--accent);
-  color: #1a1206;
-  border-color: var(--accent);
-  font-weight: 600;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  border-color: var(--color-accent);
+  font-weight: var(--weight-strong);
 }
 
 .cc-btn.acc:hover {
-  background: #ffc65a;
+  background: var(--color-accent-strong);
+  border-color: var(--color-accent-strong);
+}
+
+.cc-quit {
+  font-family: var(--font-body);
 }
 
 .cc-quit:hover {
-  border-color: #ef5350;
-  color: #ff8a80;
+  border-color: var(--color-danger-rule);
+  color: var(--color-danger-text);
 }
 
 .cc-windows {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-xs);
   flex: 1;
 }
 
 .cc-win-head {
   display: flex;
   justify-content: space-between;
-  font-size: 12px;
+  gap: var(--space-xs);
+  font-size: var(--text-sm);
+}
+
+.cc-win-head span:last-child {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
 }
 
 .cc-bar {
-  height: 7px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--color-ink) 12%, transparent);
   overflow: hidden;
-  margin: 3px 0;
+  margin: var(--space-2xs) 0;
 }
 
 .cc-bar-fill {
   height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #4caf7d, #9bd35f);
-  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  width: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--color-ok);
+  transform-origin: left center;
+  transform: scaleX(var(--frac, 0));
+  transition: transform var(--dur-long) var(--ease-out);
 }
 
 .cc-bar-fill.warn {
-  background: linear-gradient(90deg, #f2b134, #f26b34);
+  background: var(--color-accent);
 }
 
 .cc-foot {
@@ -282,16 +291,18 @@ body.expanded .ring-view {
 }
 
 .muted {
-  color: var(--muted);
+  color: var(--color-muted);
 }
 
 .warn {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 .small {
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
+
+/* ── Keyframes ──────────────────────────────────────────── */
 
 @keyframes bubble-in {
   from {
@@ -304,28 +315,14 @@ body.expanded .ring-view {
   }
 }
 
-@keyframes breathe {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.045);
-  }
-}
+/* ── Reduced motion ─────────────────────────────────────── */
 
-@keyframes glow-pulse {
-  0%,
-  100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 150ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 150ms !important;
   }
 }

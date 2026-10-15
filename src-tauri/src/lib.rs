@@ -121,6 +121,7 @@ const COMPACT_CIRCLE: (f64, f64) = (88.0, 88.0);
 const COMPACT_CARD: (f64, f64) = (340.0, 200.0);
 const COMPACT_MARGIN: f64 = 20.0;
 const COMPACT_COLLAPSE_GRACE: Duration = Duration::from_millis(400);
+const COMPACT_CARD_ANIM: Duration = Duration::from_millis(240);
 
 static COMPACT_DRAGGING: AtomicBool = AtomicBool::new(false);
 
@@ -270,6 +271,7 @@ fn compact_tick(
     app: &tauri::AppHandle,
     window: &tauri::WebviewWindow,
     unhovered_since: &mut Option<Instant>,
+    collapse_pending: &mut Option<Instant>,
 ) {
     let (Ok(pos), Ok(size)) = (window.outer_position(), window.outer_size()) else {
         return;
@@ -310,6 +312,21 @@ fn compact_tick(
 
     let expanded = size.width as f64 > 150.0 * scale;
 
+    if let Some(deadline) = *collapse_pending {
+        if hovered {
+            *collapse_pending = None;
+            *unhovered_since = None;
+            let _ = window.emit("compact-expand", ());
+            return;
+        }
+        if Instant::now() >= deadline {
+            *collapse_pending = None;
+            let _ = window.set_size(tauri::LogicalSize::new(COMPACT_CIRCLE.0, COMPACT_CIRCLE.1));
+            place_compact(app, window, anchor, COMPACT_CIRCLE, scale);
+        }
+        return;
+    }
+
     if hovered {
         *unhovered_since = None;
         if !expanded {
@@ -330,9 +347,8 @@ fn compact_tick(
         Some(since) => {
             if Instant::now().duration_since(since) >= COMPACT_COLLAPSE_GRACE {
                 *unhovered_since = None;
-                let _ = window.set_size(tauri::LogicalSize::new(COMPACT_CIRCLE.0, COMPACT_CIRCLE.1));
-                place_compact(app, window, anchor, COMPACT_CIRCLE, scale);
                 let _ = window.emit("compact-collapse", ());
+                *collapse_pending = Some(Instant::now() + COMPACT_CARD_ANIM);
             }
         }
     }
@@ -341,14 +357,18 @@ fn compact_tick(
 fn spawn_compact_watcher(app: tauri::AppHandle) {
     std::thread::spawn(move || {
         let mut unhovered_since: Option<Instant> = None;
+        let mut collapse_pending: Option<Instant> = None;
         loop {
             let mut interval = Duration::from_millis(200);
             match app.get_webview_window("compact") {
                 Some(window) if window.is_visible().unwrap_or(false) => {
-                    compact_tick(&app, &window, &mut unhovered_since);
+                    compact_tick(&app, &window, &mut unhovered_since, &mut collapse_pending);
                     interval = Duration::from_millis(140);
                 }
-                _ => unhovered_since = None,
+                _ => {
+                    unhovered_since = None;
+                    collapse_pending = None;
+                }
             }
             if COMPACT_DRAGGING.load(Ordering::Relaxed) {
                 interval = Duration::from_millis(40);

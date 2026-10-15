@@ -1,0 +1,13 @@
+[
+  {
+    "date": "2026-10-15",
+    "macrostructure": "Stat-Led",
+    "theme": "custom",
+    "theme_axes": "dark / display-heavy / warm-amber",
+    "vibe": "bold, modern, strong, curvy, zero-gradient",
+    "enrichment": "none",
+    "brief": "Kenari Usage · full app restyle — dashboard + compact widget",
+    "scope": "app",
+    "design_system": "design.md"
+  }
+]

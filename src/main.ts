@@ -78,6 +78,23 @@ const ESCAPES: Record<string, string> = {
 const escapeHtml = (value: string): string =>
   value.replace(/[&<>"']/g, (char) => ESCAPES[char] ?? char);
 
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+const colorProbe = document.createElement("canvas");
+colorProbe.width = 1;
+colorProbe.height = 1;
+
+function tokenColor(name: string, alpha = 1): string {
+  const ctx = colorProbe.getContext("2d");
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  if (!ctx || !raw) return "transparent";
+  ctx.fillStyle = "#000";
+  ctx.fillStyle = raw;
+  ctx.fillRect(0, 0, 1, 1);
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+  return alpha === 1 ? `rgb(${r}, ${g}, ${b})` : `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 let toastTimer: number | undefined;
 
 function toast(message: string, isError = false): void {
@@ -104,8 +121,30 @@ function renderKeyBadge(): void {
   box.textContent = `Status: aktif · sumber: ${status.source ?? "-"} · ${status.masked ?? ""}`;
 }
 
+let balanceRaf = 0;
+
+function animateBalance(target: number): void {
+  const el = $("balance-available");
+  const from = Number(el.dataset.micro ?? String(target));
+  el.dataset.micro = String(target);
+  window.cancelAnimationFrame(balanceRaf);
+  if (prefersReducedMotion.matches || from === target) {
+    el.textContent = fmtMicroRp(target);
+    return;
+  }
+  const start = performance.now();
+  const duration = 400;
+  const tick = (now: number): void => {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = fmtMicroRp(from + (target - from) * eased);
+    if (t < 1) balanceRaf = window.requestAnimationFrame(tick);
+  };
+  balanceRaf = window.requestAnimationFrame(tick);
+}
+
 function renderBalance(balance: Balance): void {
-  $("balance-available").textContent = fmtMicroRp(balance.available_micro_idr);
+  animateBalance(balance.available_micro_idr);
   $("balance-sub").textContent = `total ${fmtMicroRp(balance.balance_micro_idr)} · tertahan ${fmtMicroRp(balance.reserved_micro_idr)}`;
 }
 
@@ -117,7 +156,7 @@ function windowRow(label: string, window: QuotaWindow, alertPct: number): string
       <span>${label}</span>
       <span class="${warn ? "warn" : "muted"}">${fmtPct(window.used_frac)} · ${fmtRp(window.used_rp)} / ${fmtRp(window.budget_rp)}</span>
     </div>
-    <div class="bar"><div class="bar-fill ${warn ? "warn" : ""}" style="width:${pct.toFixed(2)}%"></div></div>
+    <div class="bar"><div class="bar-fill ${warn ? "warn" : ""}" style="--frac:${(pct / 100).toFixed(4)}"></div></div>
     <div class="sub">sisa ${fmtRp(window.remaining_rp)} · reset ${fmtDateTime(window.resets_at)}</div>
   </div>`;
 }
@@ -195,6 +234,9 @@ function renderUsage(usage: UsageSummary): void {
 function renderChart(daily: UsageDaily): void {
   const canvas = $<HTMLCanvasElement>("daily-chart");
   state.chart?.destroy();
+  const tickFont = getComputedStyle(document.documentElement)
+    .getPropertyValue("--font-data")
+    .trim();
   state.chart = new Chart(canvas, {
     type: "bar",
     data: {
@@ -203,8 +245,10 @@ function renderChart(daily: UsageDaily): void {
         {
           label: "Biaya dari saldo (Rp)",
           data: daily.data.map((row) => row.cost_micro_idr / 1_000_000),
-          backgroundColor: "rgba(242, 177, 52, 0.75)",
-          borderRadius: 3,
+          backgroundColor: tokenColor("--color-accent", 0.85),
+          hoverBackgroundColor: tokenColor("--color-accent", 1),
+          borderRadius: 8,
+          borderSkipped: false,
         },
       ],
     },
@@ -215,17 +259,28 @@ function renderChart(daily: UsageDaily): void {
       plugins: {
         legend: { display: false },
         tooltip: {
+          backgroundColor: tokenColor("--color-paper-3"),
+          borderColor: tokenColor("--color-rule"),
+          borderWidth: 1,
+          cornerRadius: 12,
+          padding: 10,
+          displayColors: false,
+          titleColor: tokenColor("--color-ink"),
+          bodyColor: tokenColor("--color-ink-2"),
           callbacks: {
             label: (item) => `Rp ${fmtNumber(item.parsed.y ?? 0)}`,
           },
         },
       },
       scales: {
-        x: { ticks: { color: "#8b96a5" }, grid: { color: "#232a33" } },
+        x: {
+          ticks: { color: tokenColor("--color-muted"), font: { family: tickFont, size: 11 } },
+          grid: { color: tokenColor("--color-rule-2") },
+        },
         y: {
           beginAtZero: true,
-          ticks: { color: "#8b96a5" },
-          grid: { color: "#232a33" },
+          ticks: { color: tokenColor("--color-muted"), font: { family: tickFont, size: 11 } },
+          grid: { color: tokenColor("--color-rule-2") },
         },
       },
     },
