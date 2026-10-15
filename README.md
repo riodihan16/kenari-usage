@@ -49,6 +49,16 @@ npm run build          # type-check + build frontend ke dist/
 npm run tauri build    # bundel aplikasi desktop
 ```
 
+## Pengujian
+
+```bash
+npm test                          # unit test frontend (Vitest)
+cd src-tauri && cargo test        # unit test Rust
+cd src-tauri && cargo clippy      # lint Rust
+```
+
+CI menjalankan semua perintah di atas pada setiap push/PR (lihat `.github/workflows/ci.yml`).
+
 ## Menyiapkan API key
 
 API key diambil dengan urutan prioritas berikut (lihat `src-tauri/src/config.rs`):
@@ -73,6 +83,8 @@ src/
   kenari.ts              Binding ke command Tauri + tipe data
   format.ts              Helper format angka/mata uang
   html.ts                Helper escaping HTML + render baris kuota
+  dom.ts                 Helper DOM bersama
+  *.test.ts              Unit test (Vitest)
   tokens.css             Token desain (warna, spacing, radius)
   styles.css             Gaya dashboard
   compact.css            Gaya widget compact

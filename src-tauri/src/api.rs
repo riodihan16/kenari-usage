@@ -176,15 +176,20 @@ pub struct Client {
     key: String,
 }
 
+const MAX_RESPONSE_BYTES: u64 = 10 * 1024 * 1024;
+
+pub fn build_http() -> Result<reqwest::Client, ApiError> {
+    reqwest::Client::builder()
+        .user_agent(concat!("kenari-usage/", env!("CARGO_PKG_VERSION")))
+        .timeout(Duration::from_secs(30))
+        .connect_timeout(Duration::from_secs(10))
+        .build()
+        .map_err(|e| ApiError::local(format!("Gagal menyiapkan klien HTTP: {e}")))
+}
+
 impl Client {
-    pub fn new(key: String) -> Result<Self, ApiError> {
-        let http = reqwest::Client::builder()
-            .user_agent(concat!("kenari-usage/", env!("CARGO_PKG_VERSION")))
-            .timeout(Duration::from_secs(30))
-            .connect_timeout(Duration::from_secs(10))
-            .build()
-            .map_err(|e| ApiError::local(format!("Gagal menyiapkan klien HTTP: {e}")))?;
-        Ok(Self { http, key })
+    pub fn with_http(http: reqwest::Client, key: String) -> Self {
+        Self { http, key }
     }
 
     async fn get<T: serde::de::DeserializeOwned>(
@@ -202,10 +207,19 @@ impl Client {
             .await
             .map_err(|e| ApiError::local(format!("Gagal menghubungi Kenari: {e}")))?;
         let status = response.status().as_u16();
+        if response
+            .content_length()
+            .is_some_and(|len| len > MAX_RESPONSE_BYTES)
+        {
+            return Err(ApiError::local("Respons Kenari terlalu besar."));
+        }
         let body = response
             .text()
             .await
             .map_err(|e| ApiError::local(format!("Gagal membaca respons Kenari: {e}")))?;
+        if body.len() as u64 > MAX_RESPONSE_BYTES {
+            return Err(ApiError::local("Respons Kenari terlalu besar."));
+        }
         if !(200..300).contains(&status) {
             return Err(parse_error(status, &body));
         }
@@ -316,8 +330,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn client_builds_without_panicking() {
-        let client = Client::new("kn-test-1234567890".to_string());
+    fn build_http_succeeds() {
+        let client = build_http();
         assert!(client.is_ok(), "client should build: {:?}", client.err());
     }
 

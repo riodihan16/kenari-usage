@@ -23,6 +23,7 @@ import {
   type UsageLogPage,
   type UsageSummary,
 } from "./kenari";
+import { $ } from "./dom";
 import {
   fmtDateTime,
   fmtInt,
@@ -34,9 +35,6 @@ import {
   pageCount,
 } from "./format";
 import { escapeHtml, quotaWindowRow } from "./html";
-
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T =>
-  document.getElementById(id) as T;
 
 interface UiState {
   range: RangeKey;
@@ -118,8 +116,12 @@ function animateBalance(target: number): void {
   const from = Number(el.dataset.micro ?? String(target));
   el.dataset.micro = String(target);
   window.cancelAnimationFrame(balanceRaf);
+  const announce = (): void => {
+    $("balance-live").textContent = `Saldo tersedia ${fmtMicroRp(target)}`;
+  };
   if (prefersReducedMotion.matches || from === target) {
     el.textContent = fmtMicroRp(target);
+    announce();
     return;
   }
   const start = performance.now();
@@ -128,7 +130,11 @@ function animateBalance(target: number): void {
     const t = Math.min((now - start) / duration, 1);
     const eased = 1 - Math.pow(1 - t, 3);
     el.textContent = fmtMicroRp(from + (target - from) * eased);
-    if (t < 1) balanceRaf = window.requestAnimationFrame(tick);
+    if (t < 1) {
+      balanceRaf = window.requestAnimationFrame(tick);
+    } else {
+      announce();
+    }
   };
   balanceRaf = window.requestAnimationFrame(tick);
 }
@@ -428,7 +434,8 @@ function wireEvents(): void {
     void enterCompact();
   });
   $("settings-btn").addEventListener("click", () => {
-    $<HTMLDialogElement>("settings-dialog").showModal();
+    const dialog = $<HTMLDialogElement>("settings-dialog");
+    if (!dialog.open) dialog.showModal();
   });
   $("save-key-btn").addEventListener("click", () => {
     void saveKey();
@@ -484,7 +491,8 @@ async function init(): Promise<void> {
     await loadKeys();
     await refreshAll();
   } else {
-    $<HTMLDialogElement>("settings-dialog").showModal();
+    const dialog = $<HTMLDialogElement>("settings-dialog");
+    if (!dialog.open) dialog.showModal();
     toast("Masukkan API key Kenari untuk mulai.", true);
   }
   setupTimer();

@@ -8,10 +8,12 @@ use std::sync::Mutex;
 use std::time::{Duration, Instant};
 use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 
-fn client() -> Result<api::Client, ApiError> {
+struct HttpClient(reqwest::Client);
+
+fn client(app: &tauri::AppHandle) -> Result<api::Client, ApiError> {
     let (key, _source) =
         config::resolve_key().ok_or_else(|| ApiError::local("API key belum diatur"))?;
-    api::Client::new(key)
+    Ok(api::Client::with_http(app.state::<HttpClient>().0.clone(), key))
 }
 
 #[derive(Serialize)]
@@ -42,14 +44,16 @@ fn api_key_status() -> KeyStatus {
 }
 
 #[tauri::command]
-async fn save_api_key(key: String) -> Result<KeyStatus, ApiError> {
+async fn save_api_key(app: tauri::AppHandle, key: String) -> Result<KeyStatus, ApiError> {
     let key = key.trim().to_string();
     if !key.starts_with("kn-") || key.len() < 20 {
         return Err(ApiError::local(
             "Format API key tidak valid (harus diawali kn-)",
         ));
     }
-    api::Client::new(key.clone())?.usage("today", None).await?;
+    api::Client::with_http(app.state::<HttpClient>().0.clone(), key.clone())
+        .usage("today", None)
+        .await?;
     config::save_key(&key).map_err(ApiError::local)?;
     Ok(status())
 }
@@ -61,40 +65,43 @@ async fn clear_api_key() -> Result<KeyStatus, ApiError> {
 }
 
 #[tauri::command]
-async fn fetch_balance() -> Result<Balance, ApiError> {
-    client()?.balance().await
+async fn fetch_balance(app: tauri::AppHandle) -> Result<Balance, ApiError> {
+    client(&app)?.balance().await
 }
 
 #[tauri::command]
-async fn fetch_quota() -> Result<Quota, ApiError> {
-    client()?.quota().await
+async fn fetch_quota(app: tauri::AppHandle) -> Result<Quota, ApiError> {
+    client(&app)?.quota().await
 }
 
 #[tauri::command]
-async fn fetch_keys() -> Result<KeyList, ApiError> {
-    client()?.keys().await
+async fn fetch_keys(app: tauri::AppHandle) -> Result<KeyList, ApiError> {
+    client(&app)?.keys().await
 }
 
 #[tauri::command]
 async fn fetch_usage(
+    app: tauri::AppHandle,
     range: Option<String>,
     model: Option<String>,
 ) -> Result<UsageSummary, ApiError> {
     let range = range.unwrap_or_else(|| "30d".to_string());
-    client()?.usage(&range, model.as_deref()).await
+    client(&app)?.usage(&range, model.as_deref()).await
 }
 
 #[tauri::command]
 async fn fetch_usage_daily(
+    app: tauri::AppHandle,
     range: Option<String>,
     model: Option<String>,
 ) -> Result<UsageDaily, ApiError> {
     let range = range.unwrap_or_else(|| "30d".to_string());
-    client()?.usage_daily(&range, model.as_deref()).await
+    client(&app)?.usage_daily(&range, model.as_deref()).await
 }
 
 #[tauri::command]
 async fn fetch_usage_log(
+    app: tauri::AppHandle,
     range: Option<String>,
     page: Option<u32>,
     limit: Option<u32>,
@@ -105,7 +112,7 @@ async fn fetch_usage_log(
     let range = range.unwrap_or_else(|| "30d".to_string());
     let page = page.unwrap_or(0);
     let limit = limit.unwrap_or(50).clamp(1, 200);
-    client()?
+    client(&app)?
         .usage_log(
             &range,
             page,
@@ -411,6 +418,8 @@ pub fn run() {
     tauri::Builder::default()
         .manage(CompactRuntime::default())
         .setup(|app| {
+            let http = api::build_http().map_err(|e| e.message)?;
+            app.manage(HttpClient(http));
             spawn_compact_watcher(app.handle().clone());
             Ok(())
         })

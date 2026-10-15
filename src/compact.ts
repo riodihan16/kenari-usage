@@ -1,6 +1,7 @@
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import "./compact.css";
+import { $ } from "./dom";
 import {
   errMsg,
   fetchQuota,
@@ -11,9 +12,6 @@ import {
   type QuotaWindow,
 } from "./kenari";
 import { fmtPct, fmtRp } from "./format";
-
-const $ = <T extends HTMLElement = HTMLElement>(id: string): T =>
-  document.getElementById(id) as T;
 
 const bubble = $("bubble");
 const ringFill = document.querySelector<SVGCircleElement>("#ring-fill");

@@ -68,3 +68,5 @@ Lalu periksa ulang:
 - [ ] Izin Tauri tidak diperluas tanpa alasan.
 - [ ] CSP tidak dilonggarkan.
 - [ ] `README.md`/`design.md` diperbarui bila perilaku berubah.
+
+CI (`.github/workflows/ci.yml`) menjalankan `npm test`, `npm run build`, `cargo test`, dan `cargo clippy -D warnings` pada setiap push/PR — pastikan semuanya hijau.

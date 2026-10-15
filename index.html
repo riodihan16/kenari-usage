@@ -24,12 +24,13 @@
       <button id="settings-btn" class="btn ghost">Pengaturan</button>
     </header>
     <main>
-      <div id="alert-banner" class="banner hidden"></div>
-      <div id="error-banner" class="banner error hidden"></div>
+      <div id="alert-banner" class="banner hidden" role="status"></div>
+      <div id="error-banner" class="banner error hidden" role="alert"></div>
       <section class="cards">
         <article class="card card-balance">
           <h3>Saldo</h3>
-          <div id="balance-available" class="big" aria-live="polite">—</div>
+          <div id="balance-available" class="big">—</div>
+          <div id="balance-live" class="sr-only" role="status"></div>
           <div id="balance-sub" class="sub">total: — · tertahan: —</div>
         </article>
         <article class="card">
@@ -72,7 +73,7 @@
         <div class="card-head">
           <h3>Log request</h3>
           <div class="filters">
-            <select id="filter-kind">
+            <select id="filter-kind" aria-label="Filter jenis billing">
               <option value="">Semua jenis</option>
               <option value="payg">payg</option>
               <option value="plan">plan</option>
@@ -81,8 +82,8 @@
               <option value="free">free</option>
               <option value="byok">byok</option>
             </select>
-            <input id="filter-model" type="text" placeholder="filter model…" />
-            <select id="filter-key"><option value="">Semua key</option></select>
+            <input id="filter-model" type="text" placeholder="filter model…" aria-label="Filter model" />
+            <select id="filter-key" aria-label="Filter API key"><option value="">Semua key</option></select>
           </div>
         </div>
         <div class="table-wrap">
