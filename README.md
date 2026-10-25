@@ -6,10 +6,11 @@ Dibangun dengan **Tauri v2** (backend Rust + frontend TypeScript/Vite). Ringan, 
 
 ## Fitur
 
-- **Dashboard** — saldo, kuota plan (5 jam / mingguan / bulanan), ringkasan pemakaian, grafik harian, tabel per model, dan log request yang bisa difilter.
+- **Dashboard** — saldo, kuota plan (5 jam / mingguan / bulanan) sebagai tiga cincin, ringkasan pemakaian, grafik harian, tabel per model, dan log request yang bisa difilter.
 - **Compact widget** — widget melayang kecil yang menampilkan pemakaian kuota mingguan; hover untuk detail, tahan & geser untuk memindahkan.
 - **Penyimpanan key yang aman** — API key disimpan di OS keyring (Windows Credential Manager), bukan di file.
 - **Auto-refresh** — interval dapat diatur.
+- **Tema terang dan gelap** — mengikuti setelan tampilan sistem operasi.
 - **CSP ketat** — font di-bundle lokal, tidak ada resource eksternal.
 
 ## Stack
@@ -20,7 +21,10 @@ Dibangun dengan **Tauri v2** (backend Rust + frontend TypeScript/Vite). Ringan, 
 | Backend | Rust (`src-tauri/`) |
 | Frontend | TypeScript + Vite 6 |
 | Grafik | Chart.js |
-| Font | `@fontsource-variable` (self-hosted) |
+| Font | Inter Variable, `@fontsource-variable` (self-hosted) |
+
+Sistem desain (token, tipografi, radius, gerak, warna terang/gelap) dijelaskan di
+[`design.md`](design.md).
 
 ## Prasyarat
 

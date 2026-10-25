@@ -1,5 +1,4 @@
 import { Chart } from "chart.js/auto";
-import "./styles.css";
 import {
   apiKeyStatus,
   clearApiKey,
@@ -34,7 +33,7 @@ import {
   fmtTokens,
   pageCount,
 } from "./format";
-import { escapeHtml, quotaWindowRow } from "./html";
+import { escapeHtml, quotaRing } from "./html";
 
 interface UiState {
   range: RangeKey;
@@ -46,6 +45,7 @@ interface UiState {
   keys: AccountKey[];
   keyStatus: KeyStatus | null;
   chart: Chart | null;
+  lastDaily: UsageDaily | null;
   timer: number | null;
   refreshSecs: number;
 }
@@ -62,11 +62,13 @@ const state: UiState = {
   keys: [],
   keyStatus: null,
   chart: null,
+  lastDaily: null,
   timer: null,
   refreshSecs: Number.isFinite(storedSecs) && storedSecs >= 0 ? storedSecs : 60,
 };
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
 
 const colorProbe = document.createElement("canvas");
 colorProbe.width = 1;
@@ -106,7 +108,7 @@ function renderKeyBadge(): void {
   const label = `${status.masked ?? ""} (${status.source ?? "-"})`;
   badge.textContent = label;
   badge.classList.remove("hidden");
-  box.textContent = `Status: aktif · sumber: ${status.source ?? "-"} · ${status.masked ?? ""}`;
+  box.textContent = `Status aktif. Sumber ${status.source ?? "-"}. Key ${status.masked ?? ""}`;
 }
 
 let balanceRaf = 0;
@@ -141,24 +143,27 @@ function animateBalance(target: number): void {
 
 function renderBalance(balance: Balance): void {
   animateBalance(balance.available_micro_idr);
-  $("balance-sub").textContent = `total ${fmtMicroRp(balance.balance_micro_idr)} · tertahan ${fmtMicroRp(balance.reserved_micro_idr)}`;
+  $("balance-sub").textContent = fmtMicroRp(balance.balance_micro_idr);
+  $("balance-reserved").textContent = fmtMicroRp(balance.reserved_micro_idr);
 }
 
 function renderQuota(quota: Quota): void {
-  $("plan-name").textContent = quota.plan?.name ? `· plan ${quota.plan.name}` : "";
+  $("plan-name").textContent = quota.plan?.name ? `plan ${quota.plan.name}` : "";
   const windows = quota.plan?.windows;
   const parts: string[] = [];
-  if (windows?.five_hour) parts.push(quotaWindowRow("5 jam", windows.five_hour, quota.alert_pct));
-  if (windows?.week) parts.push(quotaWindowRow("Mingguan", windows.week, quota.alert_pct));
-  if (windows?.month) parts.push(quotaWindowRow("Bulanan", windows.month, quota.alert_pct));
+  if (windows?.five_hour) {
+    parts.push(quotaRing("5 jam", windows.five_hour, quota.alert_pct, "five-hour"));
+  }
+  if (windows?.week) parts.push(quotaRing("Mingguan", windows.week, quota.alert_pct, "week"));
+  if (windows?.month) parts.push(quotaRing("Bulanan", windows.month, quota.alert_pct, "month"));
   $("quota-windows").innerHTML =
     parts.join("") || `<div class="sub">Tidak ada kuota plan aktif.</div>`;
 
   const coupon = $("coupon-info");
   if (quota.coupon) {
     const remaining =
-      quota.coupon.remaining_rp != null ? ` · sisa ${fmtRp(quota.coupon.remaining_rp)}` : "";
-    coupon.textContent = `Kupon ${quota.coupon.name}: terpakai ${fmtRp(quota.coupon.used_rp)}${remaining} · berlaku sampai ${fmtDateTime(quota.coupon.expires_at)}`;
+      quota.coupon.remaining_rp != null ? ` Sisa ${fmtRp(quota.coupon.remaining_rp)}.` : "";
+    coupon.textContent = `Kupon ${quota.coupon.name}: terpakai ${fmtRp(quota.coupon.used_rp)}.${remaining} Berlaku sampai ${fmtDateTime(quota.coupon.expires_at)}.`;
     coupon.classList.remove("hidden");
   } else {
     coupon.classList.add("hidden");
@@ -178,7 +183,7 @@ function renderQuota(quota: Quota): void {
 }
 
 function renderUsage(usage: UsageSummary): void {
-  $("usage-window").textContent = `${fmtTime(usage.start)} — ${fmtTime(usage.end)}`;
+  $("usage-window").textContent = `${fmtTime(usage.start)} sampai ${fmtTime(usage.end)}`;
   const total = usage.total;
   const stats: Array<[string, string]> = [
     ["Request", fmtInt(total.requests)],
@@ -216,9 +221,10 @@ function renderUsage(usage: UsageSummary): void {
 
 function renderChart(daily: UsageDaily): void {
   const canvas = $<HTMLCanvasElement>("daily-chart");
+  state.lastDaily = daily;
   state.chart?.destroy();
   const tickFont = getComputedStyle(document.documentElement)
-    .getPropertyValue("--font-data")
+    .getPropertyValue("--font-body")
     .trim();
   state.chart = new Chart(canvas, {
     type: "bar",
@@ -228,9 +234,9 @@ function renderChart(daily: UsageDaily): void {
         {
           label: "Biaya dari saldo (Rp)",
           data: daily.data.map((row) => row.cost_micro_idr / 1_000_000),
-          backgroundColor: tokenColor("--color-accent", 0.85),
-          hoverBackgroundColor: tokenColor("--color-accent", 1),
-          borderRadius: 8,
+          backgroundColor: tokenColor("--color-accent", 0.9),
+          hoverBackgroundColor: tokenColor("--color-accent-strong", 1),
+          borderRadius: 4,
           borderSkipped: false,
         },
       ],
@@ -242,14 +248,14 @@ function renderChart(daily: UsageDaily): void {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: tokenColor("--color-paper-3"),
+          backgroundColor: tokenColor("--color-hud"),
           borderColor: tokenColor("--color-rule"),
-          borderWidth: 1,
-          cornerRadius: 12,
+          borderWidth: 0,
+          cornerRadius: 8,
           padding: 10,
           displayColors: false,
-          titleColor: tokenColor("--color-ink"),
-          bodyColor: tokenColor("--color-ink-2"),
+          titleColor: tokenColor("--color-hud-ink"),
+          bodyColor: tokenColor("--color-hud-ink"),
           callbacks: {
             label: (item) => `Rp ${fmtNumber(item.parsed.y ?? 0)}`,
           },
@@ -257,12 +263,24 @@ function renderChart(daily: UsageDaily): void {
       },
       scales: {
         x: {
-          ticks: { color: tokenColor("--color-muted"), font: { family: tickFont, size: 11 } },
-          grid: { color: tokenColor("--color-rule-2") },
+          border: { display: false },
+          ticks: {
+            color: tokenColor("--color-muted"),
+            font: { family: tickFont, size: 11 },
+            autoSkip: true,
+            maxTicksLimit: 8,
+            maxRotation: 0,
+          },
+          grid: { display: false },
         },
         y: {
           beginAtZero: true,
-          ticks: { color: tokenColor("--color-muted"), font: { family: tickFont, size: 11 } },
+          border: { display: false },
+          ticks: {
+            color: tokenColor("--color-muted"),
+            font: { family: tickFont, size: 11 },
+            callback: (value) => fmtNumber(Number(value)),
+          },
           grid: { color: tokenColor("--color-rule-2") },
         },
       },
@@ -271,9 +289,9 @@ function renderChart(daily: UsageDaily): void {
 }
 
 function keyLabel(id?: string | null): string {
-  if (!id) return "—";
+  if (!id) return "Tanpa key";
   const match = state.keys.find((entry) => entry.id === id);
-  if (match) return `${match.label || "(tanpa label)"} · ${match.prefix}…`;
+  if (match) return `${match.label || "(tanpa label)"} (${match.prefix}…)`;
   return `${id.slice(0, 8)}…`;
 }
 
@@ -295,7 +313,7 @@ function renderLog(page: UsageLogPage): void {
       .join("") || `<tr><td colspan="8" class="muted">Tidak ada log pada rentang ini.</td></tr>`;
 
   const pages = pageCount(page.total, page.limit);
-  $("page-info").textContent = `halaman ${page.page + 1} / ${pages} · total ${fmtInt(page.total)} request`;
+  $("page-info").textContent = `Halaman ${page.page + 1} dari ${pages}, total ${fmtInt(page.total)} request`;
   $<HTMLButtonElement>("prev-page").disabled = page.page <= 0;
   $<HTMLButtonElement>("next-page").disabled = !page.has_more;
 }
@@ -337,7 +355,7 @@ async function refreshAll(): Promise<void> {
   ]);
   const banner = $("error-banner");
   if (errors.length > 0) {
-    banner.textContent = [...new Set(errors)].join(" · ");
+    banner.textContent = [...new Set(errors)].join(". ");
     banner.classList.remove("hidden");
   } else {
     banner.classList.add("hidden");
@@ -369,7 +387,7 @@ async function loadKeys(): Promise<void> {
       state.keys
         .map(
           (entry) =>
-            `<option value="${escapeHtml(entry.id)}">${escapeHtml(entry.label || "(tanpa label)")} · ${escapeHtml(entry.prefix)}…</option>`,
+            `<option value="${escapeHtml(entry.id)}">${escapeHtml(entry.label || "(tanpa label)")} (${escapeHtml(entry.prefix)}…)</option>`,
         )
         .join("");
     select.value = current;
@@ -496,6 +514,10 @@ async function init(): Promise<void> {
     toast("Masukkan API key Kenari untuk mulai.", true);
   }
   setupTimer();
+  prefersDark.addEventListener("change", () => {
+    // Chart colours are read from CSS at draw time, so redraw for the new scheme.
+    if (state.lastDaily) renderChart(state.lastDaily);
+  });
 }
 
 void init();

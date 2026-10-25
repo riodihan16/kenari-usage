@@ -1,4 +1,8 @@
 const decimal2 = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 2 });
+const pct1 = new Intl.NumberFormat("id-ID", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
 const plain = new Intl.NumberFormat("id-ID");
 const compact = new Intl.NumberFormat("id-ID", {
   notation: "compact",
@@ -26,7 +30,7 @@ export function fmtTokens(value: number): string {
 }
 
 export function fmtPct(frac: number): string {
-  return decimal2.format(frac * 100) + "%";
+  return pct1.format(frac * 100) + "%";
 }
 
 export function fmtTime(unixSec: number): string {

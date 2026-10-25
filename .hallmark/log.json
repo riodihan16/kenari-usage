@@ -1,13 +1,36 @@
 [
-  {
-    "date": "2026-10-15",
-    "macrostructure": "Stat-Led",
-    "theme": "custom",
-    "theme_axes": "dark / display-heavy / warm-amber",
-    "vibe": "bold, modern, strong, curvy, zero-gradient",
-    "enrichment": "none",
-    "brief": "Kenari Usage · full app restyle — dashboard + compact widget",
-    "scope": "app",
-    "design_system": "design.md"
-  }
+ {
+  "date": "2026-10-25",
+  "mode": "redesign",
+  "depth": "full",
+  "scope": "app",
+  "shape": "app screen: instrument-led",
+  "theme": "custom",
+  "idea": "macOS settings pane for an API bill: the balance and three quota rings read as one instrument",
+  "axes": "light+dark/grotesk-sans/warm",
+  "hero": "instrument: balance left, three quota rings right",
+  "nav": "kept toolbar, static above a scrolling pane",
+  "footer": "none (app screen)",
+  "signature": "three quota rings beside the balance",
+  "sections": "toolbar, title, instrument, summary+chart, per-model table, log, settings sheet",
+  "imagery": "none; the rings and chart are the data",
+  "photos": 0,
+  "waived": [
+   "39b"
+  ],
+  "entry": "redesign",
+  "fingerprint": "app/instrument-led/dual-mode",
+  "prompt": "redesign total aplikasi agar lebih modern, style menyesuaikan dengan standart desain milik apple"
+ },
+ {
+  "date": "2026-10-15",
+  "macrostructure": "Stat-Led",
+  "theme": "custom",
+  "theme_axes": "dark / display-heavy / warm-amber",
+  "vibe": "bold, modern, strong, curvy, zero-gradient",
+  "enrichment": "none",
+  "brief": "Kenari Usage · full app restyle — dashboard + compact widget",
+  "scope": "app",
+  "design_system": "design.md"
+ }
 ]

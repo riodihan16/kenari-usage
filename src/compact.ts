@@ -1,6 +1,5 @@
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import "./compact.css";
 import { $ } from "./dom";
 import {
   errMsg,
@@ -15,7 +14,8 @@ import { fmtPct, fmtRp } from "./format";
 
 const bubble = $("bubble");
 const ringFill = document.querySelector<SVGCircleElement>("#ring-fill");
-const appWindow = getCurrentWindow();
+// Outside a Tauri window (a browser preview) there is no app window to drag.
+const appWindow = "__TAURI_INTERNALS__" in window ? getCurrentWindow() : null;
 
 function pop(): void {
   bubble.classList.remove("pop");
@@ -34,7 +34,7 @@ function attachDrag(el: HTMLElement): void {
     if (target.closest("button, a, input, select")) return;
     event.preventDefault();
     setCompactDragging(true).catch(() => undefined);
-    appWindow.startDragging().catch(() => undefined);
+    appWindow?.startDragging().catch(() => undefined);
   });
 }
 
@@ -47,21 +47,21 @@ function windowRow(label: string, window: QuotaWindow, alertPct: number): string
       <span class="${warn ? "warn" : "muted"}">${fmtPct(window.used_frac)}</span>
     </div>
     <div class="cc-bar"><div class="cc-bar-fill ${warn ? "warn" : ""}" style="--frac:${(pct / 100).toFixed(4)}"></div></div>
-    <div class="muted small">${fmtRp(window.used_rp)} / ${fmtRp(window.budget_rp)} · sisa ${fmtRp(window.remaining_rp)}</div>
+    <div class="muted small">${fmtRp(window.used_rp)} dari ${fmtRp(window.budget_rp)}. Sisa ${fmtRp(window.remaining_rp)}.</div>
   </div>`;
 }
 
 function render(quota: Quota): void {
   const week = quota.plan?.windows?.week ?? null;
   const frac = week ? Math.max(0, Math.min(week.used_frac, 1)) : 0;
-  $("ring-pct").textContent = week ? `${Math.round(frac * 100)}%` : "–";
+  $("ring-pct").textContent = week ? `${Math.round(frac * 100)}%` : "…";
   if (ringFill) ringFill.style.strokeDashoffset = String(100 - frac * 100);
   bubble.classList.toggle(
     "warn",
     week != null && week.used_frac * 100 >= quota.alert_pct,
   );
 
-  $("cc-plan").textContent = quota.plan?.name ? `· ${quota.plan.name}` : "";
+  $("cc-plan").textContent = quota.plan?.name ? `(${quota.plan.name})` : "";
   const parts: string[] = [];
   const windows = quota.plan?.windows;
   if (windows?.week) parts.push(windowRow("Mingguan", windows.week, quota.alert_pct));
@@ -73,7 +73,7 @@ function render(quota: Quota): void {
 async function refresh(): Promise<void> {
   try {
     render(await fetchQuota());
-    $("cc-updated").textContent = `diperbarui ${new Date().toLocaleTimeString("id-ID", { timeStyle: "short" })}`;
+    $("cc-updated").textContent = `Diperbarui ${new Date().toLocaleTimeString("id-ID", { timeStyle: "short" })}`;
   } catch (error) {
     $("cc-updated").textContent = errMsg(error);
   }
@@ -91,17 +91,26 @@ $("cc-open").addEventListener("click", () => {
 $("cc-quit").addEventListener("click", () => {
   void quitApp();
 });
+// The ring is the window's button: once the card is showing it is hidden, so a
+// click can only land before hover expands it, and it opens the dashboard.
+$("ring-view").addEventListener("click", () => {
+  void openMainWindow();
+});
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible") void refresh();
 });
-void listen("compact-expand", () => setExpanded(true)).catch(() => undefined);
-void listen("compact-collapse", () => setExpanded(false)).catch(() => undefined);
-void listen("compact-shown", () => {
-  setExpanded(false);
-  setCompactDragging(false).catch(() => undefined);
-  pop();
-  void refresh();
-}).catch(() => undefined);
+
+const inTauri = "__TAURI_INTERNALS__" in window;
+if (inTauri) {
+  void listen("compact-expand", () => setExpanded(true)).catch(() => undefined);
+  void listen("compact-collapse", () => setExpanded(false)).catch(() => undefined);
+  void listen("compact-shown", () => {
+    setExpanded(false);
+    setCompactDragging(false).catch(() => undefined);
+    pop();
+    void refresh();
+  }).catch(() => undefined);
+}
 
 pop();
 void refresh();

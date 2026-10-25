@@ -3,15 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Saldo, kuota, pemakaian, dan log request API Kenari dalam satu jendela."
+    />
     <title>Kenari Usage</title>
+    <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div class="brand">Kenari Usage</div>
+    <header class="toolbar">
+      <div class="brand"><span class="brand-dot" aria-hidden="true"></span>Kenari Usage</div>
       <div class="spacer"></div>
       <span id="key-badge" class="badge hidden"></span>
       <label class="range-label">
-        Rentang
+        <span>Rentang</span>
         <select id="range-select">
           <option value="today">Hari ini</option>
           <option value="24h">24 jam</option>
@@ -19,37 +24,57 @@
           <option value="30d" selected>30 hari</option>
         </select>
       </label>
-      <button id="compact-btn" class="btn ghost">Compact</button>
-      <button id="refresh-btn" class="btn">Muat ulang</button>
-      <button id="settings-btn" class="btn ghost">Pengaturan</button>
+      <button id="compact-btn" class="btn quiet" type="button">Compact</button>
+      <button id="refresh-btn" class="btn tint" type="button">Muat ulang</button>
+      <button id="settings-btn" class="btn quiet" type="button">Pengaturan</button>
     </header>
-    <main>
+
+    <main class="container">
+      <div class="page-head">
+        <h1>Pemakaian</h1>
+        <span id="usage-window" class="page-meta"></span>
+      </div>
+
       <div id="alert-banner" class="banner hidden" role="status"></div>
       <div id="error-banner" class="banner error hidden" role="alert"></div>
-      <section class="cards">
-        <article class="card card-balance">
-          <h3>Saldo</h3>
-          <div id="balance-available" class="big">—</div>
-          <div id="balance-live" class="sr-only" role="status"></div>
-          <div id="balance-sub" class="sub">total: — · tertahan: —</div>
-        </article>
-        <article class="card">
-          <h3>Kuota <span id="plan-name" class="muted"></span></h3>
-          <div id="quota-windows"><div class="sub">Memuat…</div></div>
+
+      <section class="card instrument" aria-label="Saldo dan kuota">
+        <div class="balance">
+          <h2 class="label">Saldo</h2>
+          <div id="balance-available" class="big">…</div>
+          <div id="balance-live" class="visually-hidden" role="status"></div>
+          <dl class="balance-split">
+            <div><dt>Total</dt><dd id="balance-sub">…</dd></div>
+            <div><dt>Tertahan</dt><dd id="balance-reserved">…</dd></div>
+          </dl>
+        </div>
+        <div class="quota">
+          <div class="quota-head">
+            <h2 class="label">Kuota</h2>
+            <span id="plan-name" class="muted"></span>
+          </div>
+          <div id="quota-windows" class="rings"><div class="sub">Memuat…</div></div>
           <div id="coupon-info" class="sub hidden"></div>
-        </article>
+        </div>
       </section>
+
       <section class="card">
         <div class="card-head">
-          <h3>Ringkasan pemakaian</h3>
-          <span id="usage-window" class="muted"></span>
+          <h2>Ringkasan pemakaian</h2>
         </div>
         <div id="totals" class="totals"></div>
-        <div class="chart-wrap"><canvas id="daily-chart"></canvas></div>
+        <div class="chart-wrap">
+          <canvas
+            id="daily-chart"
+            role="img"
+            aria-label="Grafik biaya harian dari saldo dalam rupiah"
+          ></canvas>
+        </div>
       </section>
+
       <section class="card">
         <div class="card-head">
-          <h3>Per model &amp; jenis billing</h3>
+          <h2>Per model &amp; jenis billing</h2>
         </div>
         <div class="table-wrap">
           <table>
@@ -69,9 +94,10 @@
           </table>
         </div>
       </section>
+
       <section class="card">
         <div class="card-head">
-          <h3>Log request</h3>
+          <h2>Log request</h2>
           <div class="filters">
             <select id="filter-kind" aria-label="Filter jenis billing">
               <option value="">Semua jenis</option>
@@ -82,11 +108,18 @@
               <option value="free">free</option>
               <option value="byok">byok</option>
             </select>
-            <input id="filter-model" type="text" placeholder="filter model…" aria-label="Filter model" />
-            <select id="filter-key" aria-label="Filter API key"><option value="">Semua key</option></select>
+            <input
+              id="filter-model"
+              type="text"
+              placeholder="Filter model"
+              aria-label="Filter model"
+            />
+            <select id="filter-key" aria-label="Filter API key">
+              <option value="">Semua key</option>
+            </select>
           </div>
         </div>
-        <div class="table-wrap">
+        <div class="table-wrap log">
           <table>
             <thead>
               <tr>
@@ -104,25 +137,26 @@
           </table>
         </div>
         <div class="pager">
-          <button id="prev-page" class="btn ghost">‹ Sebelumnya</button>
-          <span id="page-info" class="muted">—</span>
-          <button id="next-page" class="btn ghost">Berikutnya ›</button>
+          <button id="prev-page" class="btn quiet sm" type="button">Sebelumnya</button>
+          <span id="page-info" class="page-meta"></span>
+          <button id="next-page" class="btn quiet sm" type="button">Berikutnya</button>
         </div>
       </section>
     </main>
-    <dialog id="settings-dialog">
-      <h2>Pengaturan</h2>
-      <div id="key-status" class="sub">—</div>
+
+    <dialog id="settings-dialog" aria-labelledby="settings-title">
+      <h2 id="settings-title">Pengaturan</h2>
+      <div id="key-status" class="sub">…</div>
       <label class="field">
-        API key Kenari
+        <span>API key Kenari</span>
         <input id="key-input" type="password" placeholder="kn-…" autocomplete="off" />
       </label>
       <div class="row">
-        <button id="save-key-btn" class="btn primary" type="button">Simpan &amp; validasi</button>
-        <button id="clear-key-btn" class="btn ghost" type="button">Hapus key</button>
+        <button id="save-key-btn" class="btn primary" type="button">Simpan dan validasi</button>
+        <button id="clear-key-btn" class="btn quiet" type="button">Hapus key</button>
       </div>
       <label class="field">
-        Auto-refresh
+        <span>Auto-refresh</span>
         <select id="refresh-select">
           <option value="0">Nonaktif</option>
           <option value="30">30 detik</option>
@@ -130,15 +164,16 @@
           <option value="300">5 menit</option>
         </select>
       </label>
-      <div class="sub">
+      <p class="note">
         Key disimpan di Windows Credential Manager lewat backend Tauri. Env var KENARI_API_KEY
-        (jika ada) diprioritaskan. Saldo/kuota butuh key unrestricted; restricted key hanya bisa
-        membaca usage-nya sendiri.
-      </div>
-      <form method="dialog">
+        (jika ada) diprioritaskan. Saldo dan kuota butuh key unrestricted; restricted key hanya
+        bisa membaca usage-nya sendiri.
+      </p>
+      <form method="dialog" class="sheet-close">
         <button class="btn" type="submit">Tutup</button>
       </form>
     </dialog>
+
     <div id="toast" class="toast hidden" aria-live="polite"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

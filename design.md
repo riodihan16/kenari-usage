@@ -6,115 +6,136 @@ the system needs to grow.
 
 ## Genre
 
-modern-minimal (extended). Base register: restrained, sans top-to-bottom,
-near-monochrome, single accent used as signal. Extensions recorded here
-(explicit user brief — "bold, modern, strong, curvy, anti-gradasi"):
+modern-minimal, in the visual language of Apple's macOS/iOS apps (2026-10-25
+full redesign, explicit user brief: "lebih modern, style menyesuaikan dengan
+standar desain milik Apple"). Recorded decisions:
 
-- Display weight raised to 800 (genre default: 500–700).
-- Radius language is "curvy": cards 22 px, floating surfaces 28 px, pills 999 px
-  (genre default: 6–8 px). This is a deliberate, recorded override.
-- Single chromatic accent (Kenari gold). Categorical billing-kind hues exist
-  only as data encoding, never as decoration.
-- Gradients: none. Flat fills only, everywhere, in both windows.
+- **Grouped surfaces.** Page ground `--color-paper`; cards `--color-paper-2`
+  with a 14 px radius and a 0.5 px hairline ring instead of a visible border.
+  Apple's grouped-inset look, not outlined boxes.
+- **Hairline, not stroke.** 1 px everywhere; the 1.5 px border language is
+  retired.
+- **Radii scale** 6 / 8 / 10 / 14 / 20 px, one per nesting level. Pills are
+  reserved for genuinely round things (the floating widget, status dots);
+  controls take 8 px.
+- **Light and dark, both shipped,** re-derived per mode (never inverted), and
+  following the OS through `prefers-color-scheme`. There is no in-app toggle;
+  the app reads the system setting.
+- **Gradients: none.** Flat fills, translucency only in the HUD/toast.
+- **Accent footprint restrained** — Kenari gold marks the primary action, the
+  five-hour quota ring and the wordmark dot. Nothing else.
 
 ## Macrostructure family
 
-- App windows: **Stat-Led family** (hero stat + supporting data).
-  - Dashboard (`index.html`): hero stat (Saldo) → stat-first card grid →
-    per-model table → request log → dialog.
-  - Compact widget (`compact.html`): radial ring = the stat; expanded card =
-    supporting quota windows. Variation knob: `stat-form=radial-ring`.
+- App windows: **instrument-led** (one composite read of money and quota, then
+  the supporting data).
+  - Dashboard (`index.html`): toolbar → page title → the instrument (balance +
+    three quota rings) → usage summary with chart → per-model table → request
+    log → settings sheet.
+  - Compact widget (`compact.html`): the weekly ring is the stat; the expanded
+    card is the same instrument at widget scale.
 
 ## Theme
 
-- `--color-paper`      oklch(15% 0.012 80)   — warm charcoal
-- `--color-paper-2`    oklch(19.5% 0.014 80) — cards
-- `--color-paper-3`    oklch(24% 0.015 80)   — raised / inputs / hover
-- `--color-ink`        oklch(93% 0.008 80)
-- `--color-ink-2`      oklch(78% 0.010 80)
-- `--color-muted`      oklch(66% 0.010 80)
-- `--color-rule`       oklch(31% 0.012 80)
-- `--color-rule-2`     oklch(26% 0.011 80)
-- `--color-accent`     oklch(80% 0.15 80)    — Kenari gold
-- `--color-accent-strong` oklch(85% 0.16 80)
-- `--color-accent-ink` oklch(22% 0.04 80)
-- `--color-focus`      oklch(85% 0.17 80)
-- `--color-ok`         oklch(80% 0.13 155)   — positive signal
-- `--color-danger`     oklch(72% 0.15 25)
-- `--color-danger-text` oklch(82% 0.11 25)
+Tokens live in `src/tokens.css`; both modes are declared there.
 
-Axes: **dark / display-heavy / warm-amber**.
+Light:
+
+- `--color-paper`      oklch(97.3% 0.002 265) — grouped ground
+- `--color-paper-2`    oklch(100% 0 0)        — cards (declared `surface: absolute`)
+- `--color-paper-3`    oklch(95.5% 0.003 265) — total row
+- `--color-fill`       oklch(93.5% 0.004 265) — quiet control fill, bar track
+- `--color-field`      oklch(100% 0 0)        — inputs
+- `--color-ink`        oklch(24% 0.004 265)
+- `--color-ink-2`      oklch(38% 0.005 265)
+- `--color-muted`      oklch(45% 0.006 265)
+- `--color-rule`       oklch(88.5% 0.005 265)
+- `--color-field-edge` oklch(52% 0.006 265)   — field borders, 3:1 against paper
+- `--color-accent`     oklch(78% 0.145 80)    — Kenari gold
+- `--color-accent-ink` oklch(24% 0.05 80)
+- `--color-focus`      oklch(55% 0.21 255)    — Apple's blue focus ring
+
+Dark overrides the same names inside `@media (prefers-color-scheme: dark)`:
+paper 17.5 %, paper-2 21.5 % (cards lighter than canvas), ink 96 %, rules
+31 %, accent lifted to 80 % L, focus to 66 % L.
+
+Axes: **light + dark / grotesk-sans / warm**.
 
 ## Typography
 
-- Display: Bricolage Grotesque, weight 800, style normal.
-- Body:    Manrope, weight 400 (500 medium, 700 strong).
-- Data:    JetBrains Mono, weight 500 — carries the outlier role:
-  numerals only (hero stat, table figures, chart ticks, percentages).
-  Semantic chips/pills/labels stay in the body face — mono never sets words.
-- Headers are always roman. No italic display.
-- Body floor: 14 px (app-density deviation from the 16 px marketing floor —
-  desktop tool, data-dense tables; recorded override).
-- Numbers are always `font-variant-numeric: tabular-nums`.
+- One family: **Inter Variable** (`@fontsource-variable/inter`, self-hosted so
+  the CSP stays `'self'`). Display and body are the same face at different
+  weights — Apple's approach with SF Pro.
+- Weights in use: 400 body, 500 medium, 600 strong/display. Three, no more.
+- Scale: 12 / 13 / 14 / 15 / 17 / 20 / 24 / 28 px, plus a fluid
+  `--text-display` 36–44 px for the balance.
+- Display tracking −0.022 em, titles −0.012 em. Labels are sentence case,
+  untracked, one step smaller — never uppercase, never letter-spaced.
+- All figures use `font-variant-numeric: tabular-nums`. There is no monospace
+  face in the app.
+- Body floor: 13 px in the widget, 14 px in the dashboard (desktop tool
+  density; recorded deviation from the 16 px marketing floor).
 
 ## Spacing
 
-4-pt-derived compact app scale (dashboard density; the marketing 9-step scale
-is not appropriate for a desktop tool). Values live in `src/tokens.css` as
-`--space-3xs` … `--space-2xl`. Use named tokens only, never raw px.
+4 pt-derived app scale, `--space-3xs` (2 px) … `--space-5xl` (64 px), declared
+in `src/tokens.css`. Use named tokens only, never raw px.
 
 ## Motion
 
-- Easings: `--ease-out` cubic-bezier(0.16, 1, 0.3, 1) · `--ease-in`
-  cubic-bezier(0.7, 0, 0.84, 0) · `--ease-in-out` cubic-bezier(0.65, 0, 0.35, 1).
-- Three primitives, total, across the app: **number tick** (Saldo count-up on
-  refresh), **fill sweep** (bars/ring animate their fill), **press/lift
-  feedback** (buttons). Nothing else moves.
-- Bars and the ring animate `transform: scaleX()` / `stroke-dashoffset` —
-  never `width`.
-- Reduced-motion fallback: spatial motion collapses to ≤ 150 ms opacity;
-  count-up skipped, final value rendered immediately.
+- Easings: `--ease-out` cubic-bezier(0.32, 0.72, 0, 1) · `--ease-in`
+  cubic-bezier(0.6, 0, 0.9, 0.4) · `--ease-in-out`.
+- Three primitives, total: **number tick** (balance count-up), **fill sweep**
+  (rings and bars animate `stroke-dashoffset` / `transform: scaleX`), **sheet
+  and card** (the settings dialog and the widget's expand both scale from
+  0.98–0.2). Nothing else moves.
+- Never animate `width`, `height`, `top` or `left`; never `transition: all`.
+- Reduced motion: spatial motion collapses to ≤ 150 ms; count-up is skipped and
+  the final value renders at once.
 
 ## Microinteractions stance
 
-- Silent success: toasts for failures and hidden-effect confirmations only.
+- Silent success: toasts for failures only. The toast is a HUD pill in
+  `--color-hud`.
 - Interactive elements ship default · hover · focus-visible · active ·
-  disabled; long operations signal via disabled control + outcome toast.
-- Hover is a single-family change (colour); lift/press lives on `:active` only.
-- Focus rings appear instantly (`:focus-visible`, 2 px, `--color-focus`).
-- Hover affordances have keyboard equivalents; no hover-only interactions.
+  disabled; long operations signal via disabled control plus an outcome toast.
+- Hover is a single family change (background step). No lift, no scale.
+- Focus rings appear instantly: 2 px `--color-focus`, `outline-offset: 2px`
+  (inset `-3px` on fields so the ring never touches a neighbour).
+- Hover affordances always have keyboard equivalents.
 
 ## CTA voice
 
-- Primary: gold fill, pill, `--color-accent-ink` label, weight 700.
-- Secondary ("ghost"): transparent, 1.5 px rule border, pill; hover turns the
-  border gold.
-- Controls share one base height (`--control-h`, 44 px) — inputs and buttons
-  always match on the same row.
-- Labels stay short Indonesian imperatives ("Muat ulang", "Simpan & validasi").
+- Primary: gold fill, 8 px radius, `--color-accent-ink` label, weight 600.
+  Exactly one per window ("Muat ulang" on the dashboard, "Buka" in the widget).
+- Secondary: outlined hairline (`--color-rule`) with the ink label; quiet
+  tertiary has no border until hover.
+- All controls share `--control-h` (34 px) or `--control-h-sm` (32 px) so an
+  input and the button beside it always match.
+- Labels stay short Indonesian imperatives ("Muat ulang", "Simpan dan
+  validasi").
 
 ## Per-page allowances
 
 - App windows must NOT use enrichment (Tier-A/B art). Data carries the page.
-- The chart canvas is the only "imagery" — it is data, not decoration.
+- The chart canvas and the three quota rings are the only "imagery" — they are
+  data, not decoration.
 
 ## What windows MUST share
 
-- The wordmark (display 800 "Kenari Usage" + 11 px gold dot).
+- The wordmark: Inter 600 "Kenari Usage" with an 8 px gold dot.
 - The accent colour and its ≤ 5 % footprint.
-- Display + body + data fonts.
-- Pill shape language, radius scale, border weight (1.5 px).
+- Inter Variable, the three weights, tabular figures.
+- The radius scale, the hairline rule, the grouped-surface ladder.
 - Motion primitives and easings.
 
 ## What windows MAY differ on
 
-- Stat form (inline hero number vs radial ring).
-- Density (dashboard table padding vs compact card padding).
+- Stat form (balance + three rings on the dashboard, one ring in the widget).
+- Density (dashboard table padding vs widget card padding).
 
 ## Exports
 
-### tokens.css
-
 The canonical export is the shipped file [`src/tokens.css`](src/tokens.css).
-Tailwind `@theme`, DTCG `tokens.json`, and shadcn/ui exports are intentionally
-omitted — the project ships no Tailwind, no DTCG tooling, and no shadcn/ui.
+Tailwind `@theme`, DTCG `tokens.json` and shadcn/ui exports are intentionally
+omitted — the project ships no Tailwind, no DTCG tooling and no shadcn/ui.
